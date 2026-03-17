@@ -25,24 +25,34 @@ img {
 """, unsafe_allow_html=True)
 
 
+import os
+
 # -------------------- FAST + SAFE POSTER FETCH --------------------
 @st.cache_data(show_spinner=False)
 def fetch_poster(movie_id):
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=69ce2ec83ec1f03f44991130a293f90f&language=en-US"
+    api_key = os.getenv("TMDB_API_KEY")  # 🔐 secure
+
+    if not api_key:
+        return "https://via.placeholder.com/300x450?text=No+API+Key"
+
+    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US"
+
     try:
         res = requests.get(url, timeout=4)
+
         if res.status_code != 200:
             return "https://via.placeholder.com/300x450?text=No+Image"
 
         data = res.json()
+
         if data.get("poster_path"):
-            # smaller size = faster load
             return "https://image.tmdb.org/t/p/w342" + data["poster_path"]
         else:
             return "https://via.placeholder.com/300x450?text=No+Image"
+
     except:
         return "https://via.placeholder.com/300x450?text=No+Image"
-
+         
 
 # -------------------- RECOMMEND FUNCTION --------------------
 def recommend(movie):
