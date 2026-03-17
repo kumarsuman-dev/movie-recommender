@@ -1,11 +1,15 @@
 import pickle
 import streamlit as st
 import requests
+import gdown
+import os
 
-
-# -------------------- PAGE CONFIG --------------------
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 
+# download similarity.pkl if not present
+if not os.path.exists("similarity.pkl"):
+    url = "https://drive.google.com/uc?id=15n_cV5ahKfpJPB4hty9yBJ7opyOxUpFq"
+    gdown.download(url, "similarity.pkl", quiet=False)
 
 # -------------------- SIMPLE CSS --------------------
 
@@ -24,8 +28,6 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
-
-import os
 
 # -------------------- FAST + SAFE POSTER FETCH --------------------
 @st.cache_data(show_spinner=False)
@@ -78,7 +80,13 @@ def recommend(movie):
 st.header("Movie Recommendation System")
 
 movies = pickle.load(open("movies.pkl", "rb"))
-similarity = pickle.load(open("similarity.pkl", "rb"))
+@st.cache_data
+def load_similarity():
+    return pickle.load(open("similarity.pkl", "rb"))
+
+similarity = load_similarity()
+
+
 
 selected_movie = st.selectbox(
     "Select a movie",
