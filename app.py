@@ -9,7 +9,7 @@ st.set_page_config(page_title="Movie Recommender", layout="wide")
 # download similarity.pkl if not present
 if not os.path.exists("similarity.pkl"):
     url = "https://drive.google.com/uc?id=15n_cV5ahKfpJPB4hty9yBJ7opyOxUpFq"
-    gdown.download(url, "similarity.pkl", quiet=False)
+    gdown.download(url, "similarity.pkl", quiet=False, fuzzy=True)
 
 # -------------------- SIMPLE CSS --------------------
 
