@@ -45,7 +45,7 @@ It recommends similar movies based on the selected movie using a precomputed sim
 - Add movie details page  
 - Use deep learning models  
 
-⸻
+---
 
 👨‍💻 Author
 
