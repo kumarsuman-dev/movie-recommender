@@ -35,15 +35,15 @@ It recommends similar movies based on the selected movie using a precomputed sim
 1. User selects a movie  
 2. System finds similar movies using cosine similarity  
 3. Top 5 recommended movies are returned  
-4. Posters are fetched from TMDB API  
+4. Posters are fetched from TMDB API
 
 ---
 
-✨ Future Improvements
-	•	Add search functionality
-	•	Improve recommendation accuracy
-	•	Add movie details page
-	•	Use deep learning models
+## ✨ Future Improvements
+- Add search functionality  
+- Improve recommendation accuracy  
+- Add movie details page  
+- Use deep learning models  
 
 ⸻
 
