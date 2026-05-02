@@ -6,22 +6,27 @@ import os
 
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 
-# download similarity.pkl if not present
-if not os.path.exists("similarity.pkl"):
-    url = "https://drive.google.com/uc?id=15n_cV5ahKfpJPB4hty9yBJ7opyOxUpFq"
-    gdown.download(url, "similarity.pkl", quiet=False, fuzzy=True)
+# -------------------- DOWNLOAD FILE (ONLY ONCE) --------------------
+@st.cache_resource
+def download_similarity():
+    if not os.path.exists("similarity.pkl"):
+        url = "https://drive.google.com/uc?id=15n_cV5ahKfpJPB4hty9yBJ7opyOxUpFq"
+        gdown.download(url, "similarity.pkl", quiet=False)
+
+download_similarity()
+
 
 # -------------------- SIMPLE CSS --------------------
-
 st.markdown("""
 <style>
 .movie-text {
-     white-space: nowrap;  
-    overflow-x: auto;      
-    overflow-y: hidden;   
-    max-width: 150px;     
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 150px;
+    font-weight: 500;
+    margin-bottom: 5px;
 }
-
 img {
     border-radius: 10px;
 }
@@ -29,10 +34,23 @@ img {
 """, unsafe_allow_html=True)
 
 
-# -------------------- FAST + SAFE POSTER FETCH --------------------
+# -------------------- LOAD DATA --------------------
+@st.cache_data
+def load_movies():
+    return pickle.load(open("movies.pkl", "rb"))
+
+@st.cache_data
+def load_similarity():
+    return pickle.load(open("similarity.pkl", "rb"))
+
+movies = load_movies()
+similarity = load_similarity()
+
+
+# -------------------- POSTER FETCH --------------------
 @st.cache_data(show_spinner=False)
 def fetch_poster(movie_id):
-    api_key = os.getenv("TMDB_API_KEY")  # 🔐 secure
+    api_key = os.getenv("TMDB_API_KEY")
 
     if not api_key:
         return "https://via.placeholder.com/300x450?text=No+API+Key"
@@ -54,11 +72,15 @@ def fetch_poster(movie_id):
 
     except:
         return "https://via.placeholder.com/300x450?text=No+Image"
-         
+
 
 # -------------------- RECOMMEND FUNCTION --------------------
 def recommend(movie):
-    index = movies[movies['title'] == movie].index[0]
+    try:
+        index = movies[movies['title'] == movie].index[0]
+    except:
+        return [], []
+
     distances = sorted(
         list(enumerate(similarity[index])),
         reverse=True,
@@ -76,17 +98,8 @@ def recommend(movie):
     return names, posters
 
 
-# -------------------- LOAD DATA --------------------
-st.header("Movie Recommendation System")
-
-movies = pickle.load(open("movies.pkl", "rb"))
-@st.cache_data
-def load_similarity():
-    return pickle.load(open("similarity.pkl", "rb"))
-
-similarity = load_similarity()
-
-
+# -------------------- UI --------------------
+st.title("🎬 Movie Recommendation System")
 
 selected_movie = st.selectbox(
     "Select a movie",
@@ -99,12 +112,15 @@ if st.button("Show Recommendation"):
     with st.spinner("Loading recommendations..."):
         names, posters = recommend(selected_movie)
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    if len(names) == 0:
+        st.error("Something went wrong. Try another movie.")
+    else:
+        col1, col2, col3, col4, col5 = st.columns(5)
 
-    for col, i in zip([col1, col2, col3, col4, col5], range(5)):
-        with col:
-            st.markdown(
-                f"<div class='movie-text'>{names[i]}</div>",
-                unsafe_allow_html=True
-            )
-            st.image(posters[i], width=150)
+        for col, i in zip([col1, col2, col3, col4, col5], range(5)):
+            with col:
+                st.markdown(
+                    f"<div class='movie-text'>{names[i]}</div>",
+                    unsafe_allow_html=True
+                )
+                st.image(posters[i], width=150)
